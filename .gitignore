@@ -1,0 +1,13 @@
+# Xcode
+DerivedData/
+*.xcuserstate
+*.xcworkspace
+.build/
+
+# SwiftData / Core Data
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# macOS
+.DS_Store
