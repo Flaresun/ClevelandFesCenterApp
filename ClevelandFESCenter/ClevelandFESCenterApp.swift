@@ -10,12 +10,14 @@ import SwiftData
 
 @main
 struct ClevelandFESCenterApp: App {
+    @AppStorage("currentUserID") private var currentUserID: String?
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             EventModel.self,
             InvestigatorModel.self,
             CenterResourceModel.self,
             PressReleaseModel.self,
+            UserModel.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,9 +28,15 @@ struct ClevelandFESCenterApp: App {
         }
     }()
 
+    
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if currentUserID == nil {
+                LoginView()
+            } else {
+                HomeView()
+            }
         }
         .modelContainer(sharedModelContainer)
     }
