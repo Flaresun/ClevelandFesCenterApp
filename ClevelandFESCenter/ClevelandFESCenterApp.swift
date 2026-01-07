@@ -14,7 +14,6 @@ struct ClevelandFESCenterApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             EventModel.self,
-            InvestigatorModel.self,
             CenterResourceModel.self,
             PressReleaseModel.self,
             UserModel.self

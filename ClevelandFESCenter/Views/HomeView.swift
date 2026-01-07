@@ -33,8 +33,8 @@ struct HomeView: View {
 
                 VStack(spacing: 16) {
                     NavigationLink("Events", destination: EventView())
-                    NavigationLink( "Investigators", destination: InvestigatorView())
-                    NavigationLink("Press Release", destination: PressReleaseView())
+                    NavigationLink( "Investigators", destination: InvestigatorListView())
+                    NavigationLink("Press Release", destination: PostListView())
                     NavigationLink("Center Resource", destination: CenterResourceView())
                 }
                 .padding(.horizontal)
@@ -66,7 +66,6 @@ struct HomeView: View {
         .modelContainer(
             for: [
                 EventModel.self,
-                InvestigatorModel.self,
                 PressReleaseModel.self,
                 CenterResourceModel.self,
                 UserModel.self
