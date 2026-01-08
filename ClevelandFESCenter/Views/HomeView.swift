@@ -11,58 +11,55 @@
 //
 //  Created by FES Center on 1/6/26.
 //
+
 import SwiftUI
 import SwiftData
-
 struct HomeView: View {
     @AppStorage("currentUserID") private var currentUserID: String?
-    @Query private var users: [UserModel]
+    @State private var allUsers: [AppUser] = []
+    @State private var currentUser: AppUser? = nil
     @Binding var path: NavigationPath
 
     var body: some View {
         VStack(spacing: 24) {
-            Text(welcomeMessage)
-                .foregroundStyle(.secondary)
-        }
-        .navigationTitle("Home")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
+            if let user = currentUser {
+                Text("Welcome, \(user.firstName) \(user.lastName)! Choose where to go.")
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Welcome! Choose where to go.")
+                    .foregroundStyle(.secondary)
+            }
+
+            ScrollView {
+                VStack(spacing: 16) {
                     Button("Events") { path.append(NavigationModel.events) }
                     Button("Investigators") { path.append(NavigationModel.investigators) }
-                    Button("News") { path.append(NavigationModel.posts) }
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+                    Button("News & Updates") { path.append(NavigationModel.posts) }
                 }
+                .padding()
             }
         }
-        .navigationDestination(for: NavigationModel.self) { destination in
-            switch destination {
-            case .home:
-                HomeView(path: $path)
-            case .events:
-                EventView()
-            case .investigators:
-                InvestigatorListView()
-            case .posts:
-                PostListView()
-            default:
-                EmptyView()
+        .navigationTitle("Home")
+        .onAppear {
+            Task {
+                await loadUsers()
             }
         }
     }
 
-    private var currentUser: UserModel? {
-        guard let idString = currentUserID,
-              let id = UUID(uuidString: idString) else { return nil }
-        return users.first { $0.id == id }
-    }
+    @MainActor
+    private func loadUsers() async {
+        do {
+            let fetchedUsers = try await UserService.shared.fetchUsers()
+            allUsers = fetchedUsers
+            print("✅ Fetched \(allUsers.count) users")
 
-    private var welcomeMessage: String {
-        if let user = currentUser {
-            return "Welcome, \(user.firstName) \(user.lastName)! Choose where to go."
-        } else {
-            return "Welcome! Choose where to go."
+            if let id = currentUserID {
+                currentUser = fetchedUsers.first { $0.uuid == id }
+                print("Current user: \(currentUser?.firstName ?? "nil")")
+            }
+        } catch {
+            print("❌ Failed to fetch users:", error)
         }
     }
 }

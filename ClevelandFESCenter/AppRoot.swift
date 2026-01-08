@@ -14,14 +14,25 @@ struct AppRootView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            if let currentUser = currentUser {
-                // Only show HomeView if currentUser exists
-                HomeView(path: $path)
-            } else {
-                // Otherwise show Login
-                LoginView(path: $path)
+            LoginView(path: $path) // always start at login
+
+            // Declare all destinations
+            .navigationDestination(for: NavigationModel.self) { destination in
+                switch destination {
+                case .home:
+                    HomeView(path: $path)
+                case .events:
+                    EventView()
+                case .investigators:
+                    InvestigatorListView()
+                case .posts:
+                    PostListView()
+                default:
+                    Text("hold")
+                }
             }
         }
+
     }
 
     /// Returns the currently logged-in user, or nil if none exists

@@ -22,7 +22,11 @@ struct LoginView: View {
             TextField("First Name", text: $firstName).textFieldStyle(.roundedBorder)
             TextField("Last Name", text: $lastName).textFieldStyle(.roundedBorder)
 
-            Button("Continue") { login() }
+            Button("Continue") {
+                    Task {
+                        await login()
+                    }
+                }
                 .buttonStyle(.borderedProminent)
                 .disabled(!formIsValid)
 
@@ -33,22 +37,37 @@ struct LoginView: View {
 
     private var formIsValid: Bool { !firstName.isEmpty && !lastName.isEmpty }
 
-    private func login() {
-        // Look for existing user
-        let descriptor = FetchDescriptor<UserModel>(
-            predicate: #Predicate { $0.firstName == firstName && $0.lastName == lastName }
-        )
+    @MainActor
+    private func login() async {
+        do {
+            let users = try await UserService.shared.fetchUsers()
+            print(users)
+            print(firstName, lastName)
+            // Check for existing user
+            if let existingUser = users.first(where: {
+                $0.firstName.caseInsensitiveCompare(firstName) == .orderedSame &&
+                $0.lastName.caseInsensitiveCompare(lastName) == .orderedSame
+            }) {
+                currentUserID = existingUser.uuid
+            } else {
+                // Create a new user
+                let uuid = UUID().uuidString
+                let newUser = try await UserService.shared.createUser(
+                    uuid: uuid,
+                    firstName: firstName,
+                    lastName: lastName
+                )
+                currentUserID = newUser.uuid
+                print("currentUserId \(currentUserID)")
+            }
+            
+            // 4️⃣ Navigate
+            path.append(NavigationModel.home)
 
-        let user: UserModel
-        if let existing = try? modelContext.fetch(descriptor).first {
-            user = existing
-        } else {
-            let newUser = UserModel(firstName: firstName, lastName: lastName)
-            modelContext.insert(newUser)
-            user = newUser
+        } catch {
+            print("Login failed:", error)
+            // TODO: show user-facing error
         }
-
-        currentUserID = user.id.uuidString
-        path.append(NavigationModel.home) // push HomeView
     }
+
 }
