@@ -11,5 +11,4 @@ enum NavigationModel: Hashable {
     case events
     case investigators
     case posts
-    case resources
 }

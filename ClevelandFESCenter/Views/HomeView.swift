@@ -30,8 +30,7 @@ struct HomeView: View {
                 Menu {
                     Button("Events") { path.append(NavigationModel.events) }
                     Button("Investigators") { path.append(NavigationModel.investigators) }
-                    Button("Press Releases") { path.append(NavigationModel.posts) }
-                    Button("Center Resources") { path.append(NavigationModel.resources) }
+                    Button("News") { path.append(NavigationModel.posts) }
                 } label: {
                     Image(systemName: "line.3.horizontal")
                 }
@@ -47,8 +46,6 @@ struct HomeView: View {
                 InvestigatorListView()
             case .posts:
                 PostListView()
-            case .resources:
-                CenterResourceView()
             default:
                 EmptyView()
             }
