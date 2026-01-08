@@ -4,13 +4,11 @@
 //
 //  Created by FES Center on 1/6/26.
 //
-
 import SwiftUI
 import SwiftData
 
 @main
 struct ClevelandFESCenterApp: App {
-    @AppStorage("currentUserID") private var currentUserID: String?
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             EventModel.self,
@@ -27,16 +25,10 @@ struct ClevelandFESCenterApp: App {
         }
     }()
 
-    
-
     var body: some Scene {
         WindowGroup {
-            if currentUserID == nil {
-                LoginView()
-            } else {
-                HomeView()
-            }
+            AppRootView()
+                .modelContainer(sharedModelContainer)
         }
-        .modelContainer(sharedModelContainer)
     }
 }

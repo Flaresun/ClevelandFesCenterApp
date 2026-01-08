@@ -11,46 +11,44 @@ struct InvestigatorListView: View {
     @State private var isLoading = true
 
     var body: some View {
-        NavigationStack {
-            List(investigators) { investigator in
-                NavigationLink(destination: InvestigatorView(investigator: investigator)) {
-                    VStack(alignment: .center, spacing: 8) {
-                        // Image centered
-                        AsyncImage(url: investigator.imageURL) { image in
-                            image.resizable()
-                                 .scaledToFit()
-                                 .frame(height: 150)
-                                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                        } placeholder: {
-                            ProgressView()
-                                .frame(height: 150)
-                        }
-
-                        // Name centered
-                        Text(investigator.name)
-                            .font(.headline)
-                            .multilineTextAlignment(.center)
-
-                        // Role centered
-                        Text(investigator.role ?? "")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
+        List(investigators) { investigator in
+            NavigationLink(destination: InvestigatorView(investigator: investigator)) {
+                VStack(alignment: .center, spacing: 8) {
+                    // Image centered
+                    AsyncImage(url: investigator.imageURL) { image in
+                        image.resizable()
+                             .scaledToFit()
+                             .frame(height: 150)
+                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                    } placeholder: {
+                        ProgressView()
+                            .frame(height: 150)
                     }
-                    .frame(maxWidth: .infinity) // Fill width for centering
-                    .padding(.vertical, 8)
+
+                    // Name centered
+                    Text(investigator.name)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+
+                    // Role centered
+                    Text(investigator.role ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
-                .listRowSeparator(.hidden) // Optional: remove separators for cleaner look
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
             }
-            .navigationTitle("Investigators")
-            .task {
-                do {
-                    investigators = try await InvestigatorService.shared.fetchInvestigators()
-                    isLoading = false
-                } catch {
-                    print("Error fetching investigators:", error)
-                    isLoading = false
-                }
+            .listRowSeparator(.hidden)
+        }
+        .navigationTitle("Investigators")
+        .task {
+            do {
+                investigators = try await InvestigatorService.shared.fetchInvestigators()
+                isLoading = false
+            } catch {
+                print("Error fetching investigators:", error)
+                isLoading = false
             }
         }
     }
