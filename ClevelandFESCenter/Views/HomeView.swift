@@ -12,54 +12,88 @@
 //  Created by FES Center on 1/6/26.
 //
 
+
 import SwiftUI
-import SwiftData
+
 struct HomeView: View {
+    @StateObject private var feedVM = FeedViewModel()
     @AppStorage("currentUserID") private var currentUserID: String?
-    @State private var allUsers: [AppUser] = []
     @State private var currentUser: AppUser? = nil
     @Binding var path: NavigationPath
 
     var body: some View {
-        VStack(spacing: 24) {
-            if let user = currentUser {
-                Text("Welcome, \(user.firstName) \(user.lastName)! Choose where to go.")
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("Welcome! Choose where to go.")
-                    .foregroundStyle(.secondary)
-            }
-
-            ScrollView {
-                VStack(spacing: 16) {
-                    Button("Events") { path.append(NavigationModel.events) }
-                    Button("Investigators") { path.append(NavigationModel.investigators) }
-                    Button("News & Updates") { path.append(NavigationModel.posts) }
+        ScrollView {
+            VStack(spacing: 16) {
+                if let user = currentUser {
+                    Text("Welcome, \(user.firstName) \(user.lastName)!").foregroundStyle(.secondary)
+                } else {
+                    Text("Welcome!").foregroundStyle(.secondary)
                 }
-                .padding()
+
+                Divider()
+
+                ForEach(feedVM.posts) { post in
+                    PostCardView(post: post, author: feedVM.user(for: post))
+                        .padding(.bottom, 8)
+                }
             }
+            .padding()
+        }
+        .refreshable {
+            await feedVM.reloadFeed()
         }
         .navigationTitle("Home")
-        .onAppear {
-            Task {
-                await loadUsers()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        path.append(NavigationModel.profile)
+                    } label: {
+                        Label("Profile", systemImage: "plus")
+                    }
+
+                    Button {
+                        path.append(NavigationModel.events)
+                    } label: {
+                        Label("Events", systemImage: "calendar")
+                    }
+
+                    Button {
+                        path.append(NavigationModel.investigators)
+                    } label: {
+                        Label("Investigators", systemImage: "person.3")
+                    }
+
+                    Button {
+                        path.append(NavigationModel.posts)
+                    } label: {
+                        Label("News & Updates", systemImage: "newspaper")
+                    }
+
+                    Divider()
+
+                    Button(role: .destructive) {
+                        currentUserID = nil
+                        path.removeLast(path.count)
+                    } label: {
+                        Label("Log Out", systemImage: "arrow.backward")
+                    }
+                } label: {
+                    Image(systemName: "plus.circle")
+                        .imageScale(.large)
+                }
             }
+        }
+        .task {
+            await loadCurrentUser()
+            await feedVM.reloadFeed()
         }
     }
 
     @MainActor
-    private func loadUsers() async {
-        do {
-            let fetchedUsers = try await UserService.shared.fetchUsers()
-            allUsers = fetchedUsers
-            print("✅ Fetched \(allUsers.count) users")
-
-            if let id = currentUserID {
-                currentUser = fetchedUsers.first { $0.uuid == id }
-                print("Current user: \(currentUser?.firstName ?? "nil")")
-            }
-        } catch {
-            print("❌ Failed to fetch users:", error)
-        }
+    private func loadCurrentUser() async {
+        guard let id = currentUserID else { return }
+        let users = try? await UserService.shared.fetchUsers()
+        currentUser = users?.first { $0.uuid == id }
     }
 }

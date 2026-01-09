@@ -19,14 +19,11 @@ struct AppRootView: View {
             // Declare all destinations
             .navigationDestination(for: NavigationModel.self) { destination in
                 switch destination {
-                case .home:
-                    HomeView(path: $path)
-                case .events:
-                    EventView()
-                case .investigators:
-                    InvestigatorListView()
-                case .posts:
-                    PostListView()
+                case .home: HomeView(path: $path)
+                case .events: EventView()
+                case .investigators: InvestigatorListView()
+                case .posts: PostListView()
+                case .profile: ProfileView(path: path)
                 default:
                     Text("hold")
                 }

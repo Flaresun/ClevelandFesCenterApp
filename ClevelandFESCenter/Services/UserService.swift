@@ -103,7 +103,7 @@ class UserService {
         )!
 
         components.queryItems = [
-            URLQueryItem(name: "per_page", value: "10")
+            URLQueryItem(name: "per_page", value: "99")
         ]
 
         guard let url = components.url else {
@@ -119,7 +119,7 @@ class UserService {
         guard let http = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
-
+        
         do {
             return try JSONDecoder().decode([AppUser].self, from: data)
         } catch {

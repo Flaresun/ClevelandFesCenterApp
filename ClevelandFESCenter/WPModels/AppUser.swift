@@ -10,7 +10,8 @@ struct AppUser: Codable, Identifiable, Hashable {
 
     let id: Int
     let acf: AppUserACF
-    
+    let avatarURL: String?
+
     var uuid: String {
         acf.uuid ?? ""
     }
